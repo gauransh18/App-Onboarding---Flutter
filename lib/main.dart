@@ -20,6 +20,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'App Start',
       theme: ThemeData.dark(),
       home: isFirstTime ? AppStart() : HomePage(),
@@ -66,5 +67,3 @@ class _AppStartState extends State<AppStart> {
     );
   }
 }
-
-
