@@ -9,22 +9,62 @@ void main() async {
   var boolKey = 'isFirstTime';
   var isFirstTime = prefs.getBool(boolKey) ?? true;
 
-  runApp(
-    MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: isFirstTime ? IntroD(prefs, boolKey) : HomePage(),
-    ),
-  );
-  // runApp(const MyApp());
+  runApp(MyApp(isFirstTime: isFirstTime));
 }
 
-class IntroD extends StatelessWidget {
-  final SharedPreferences prefs;
-  final String boolKey;
-  IntroD(this.prefs, this.boolKey);
+class MyApp extends StatelessWidget {
+  final bool isFirstTime;
 
+  const MyApp({Key? key, required this.isFirstTime}) : super(key: key);
+
+  @override
   Widget build(BuildContext context) {
-    prefs.setBool(boolKey, false);
-    return Intro();
+    return MaterialApp(
+      title: 'App Start',
+      theme: ThemeData.dark(),
+      home: isFirstTime ? AppStart() : HomePage(),
+    );
   }
 }
+
+class AppStart extends StatefulWidget {
+  @override
+  _AppStartState createState() => _AppStartState();
+}
+
+class _AppStartState extends State<AppStart> {
+  Future<bool> hasVisited() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool hasVisited = prefs.getBool('notVisited') ?? true;
+    return hasVisited;
+  }
+
+  void notVisited() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('notVisited', false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: hasVisited(),
+      builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+        if (snapshot.hasData && snapshot.data!) {
+          return Intro(
+            visited: () {
+              notVisited();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomePage()),
+              );
+            },
+          );
+        } else {
+          return HomePage();
+        }
+      },
+    );
+  }
+}
+
+
